@@ -71,6 +71,67 @@ impl MinifluxServer {
             .map_err(api_err)?;
         Ok(CallToolResult::success(vec![Content::text(opml)]))
     }
+
+    #[tool(
+        name = "miniflux_get_feeds",
+        description = "List all subscribed feeds"
+    )]
+    async fn get_feeds(&self) -> Result<CallToolResult, rmcp::Error> {
+        let feeds = self.api.get_feeds(&self.client).await.map_err(api_err)?;
+        Ok(CallToolResult::success(vec![Content::text(format!(
+            "{:#?}", feeds
+        ))]))
+    }
+
+    #[tool(
+        name = "miniflux_get_feed",
+        description = "Get a single feed by its ID"
+    )]
+    async fn get_feed(&self, #[tool(param)] id: i64) -> Result<CallToolResult, rmcp::Error> {
+        let feed = self
+            .api
+            .get_feed(id, &self.client)
+            .await
+            .map_err(api_err)?;
+        Ok(CallToolResult::success(vec![Content::text(format!(
+            "{:#?}", feed
+        ))]))
+    }
+
+    #[tool(
+        name = "miniflux_get_feed_icon",
+        description = "Get the favicon/icon for a feed by feed ID"
+    )]
+    async fn get_feed_icon(&self, #[tool(param)] id: i64) -> Result<CallToolResult, rmcp::Error> {
+        let icon = self
+            .api
+            .get_feed_icon(id, &self.client)
+            .await
+            .map_err(api_err)?;
+        let json = serde_json::to_string_pretty(&icon)
+            .map_err(|e| rmcp::Error::internal_error(format!("{e}"), None))?;
+        Ok(CallToolResult::success(vec![Content::text(json)]))
+    }
+
+    #[tool(
+        name = "miniflux_discover_subscription",
+        description = "Discover RSS/Atom feeds available at a given URL"
+    )]
+    async fn discover_subscription(
+        &self,
+        #[tool(param)] url: String,
+    ) -> Result<CallToolResult, rmcp::Error> {
+        let feed_url = url::Url::parse(&url)
+            .map_err(|e| rmcp::Error::invalid_params(format!("Invalid URL: {e}"), None))?;
+        let feeds = self
+            .api
+            .discover_subscription(feed_url, &self.client)
+            .await
+            .map_err(api_err)?;
+        Ok(CallToolResult::success(vec![Content::text(format!(
+            "{:#?}", feeds
+        ))]))
+    }
 }
 
 #[tool(tool_box)]
