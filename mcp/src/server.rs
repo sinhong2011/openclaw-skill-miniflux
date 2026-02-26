@@ -6,6 +6,10 @@ use rmcp::{ServerHandler, ServiceExt, model::*, tool};
 
 use crate::config::Config;
 
+fn api_err(e: miniflux_api::ApiError) -> rmcp::Error {
+    rmcp::Error::internal_error(format!("{e}"), None)
+}
+
 #[derive(Clone)]
 pub struct MinifluxServer {
     api: Arc<MinifluxApi>,
@@ -37,6 +41,35 @@ impl MinifluxServer {
         Ok(CallToolResult::success(vec![Content::text(
             "Miniflux instance is healthy",
         )]))
+    }
+
+    #[tool(
+        name = "miniflux_get_categories",
+        description = "List all feed categories"
+    )]
+    async fn get_categories(&self) -> Result<CallToolResult, rmcp::Error> {
+        let categories = self
+            .api
+            .get_categories(&self.client)
+            .await
+            .map_err(api_err)?;
+        Ok(CallToolResult::success(vec![Content::text(format!(
+            "{:#?}",
+            categories
+        ))]))
+    }
+
+    #[tool(
+        name = "miniflux_export_opml",
+        description = "Export all feeds as OPML XML"
+    )]
+    async fn export_opml(&self) -> Result<CallToolResult, rmcp::Error> {
+        let opml = self
+            .api
+            .export_opml(&self.client)
+            .await
+            .map_err(api_err)?;
+        Ok(CallToolResult::success(vec![Content::text(opml)]))
     }
 }
 
