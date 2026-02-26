@@ -1,4 +1,5 @@
 mod config;
+mod server;
 
 use clap::Parser;
 use config::Config;
@@ -31,7 +32,7 @@ struct Cli {
 async fn main() {
     let cli = Cli::parse();
 
-    let _config = Config::new(
+    let config = Config::new(
         cli.miniflux_url,
         cli.api_token,
         cli.username,
@@ -43,8 +44,8 @@ async fn main() {
         std::process::exit(1);
     });
 
-    eprintln!(
-        "Miniflux MCP server starting (read_only={})",
-        _config.read_only
-    );
+    if let Err(e) = server::run(config).await {
+        eprintln!("Server error: {e}");
+        std::process::exit(1);
+    }
 }
