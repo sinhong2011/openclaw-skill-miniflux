@@ -32,6 +32,17 @@ fn parse_direction(s: &str) -> Result<OrderDirection, rmcp::Error> {
     OrderDirection::try_from(s).map_err(|_| parse_err("direction", s, "asc, desc"))
 }
 
+fn check_write_allowed(read_only: bool) -> Result<(), rmcp::Error> {
+    if read_only {
+        Err(rmcp::Error::invalid_request(
+            "Read-only mode: write operations are disabled. Remove --read-only flag or set MINIFLUX_READ_ONLY=false to enable writes.",
+            None,
+        ))
+    } else {
+        Ok(())
+    }
+}
+
 #[derive(Clone)]
 pub struct MinifluxServer {
     api: Arc<MinifluxApi>,
@@ -305,6 +316,92 @@ impl MinifluxServer {
         Ok(CallToolResult::success(vec![Content::text(format!(
             "{:#?}", user
         ))]))
+    }
+
+    #[tool(
+        name = "miniflux_update_entry_status",
+        description = "Mark one or more entries as read, unread, or removed. Provide a list of entry IDs and a status ('read', 'unread', or 'removed')."
+    )]
+    async fn update_entry_status(
+        &self,
+        #[tool(param)] entry_ids: Vec<i64>,
+        #[tool(param)] status: String,
+    ) -> Result<CallToolResult, rmcp::Error> {
+        check_write_allowed(self.read_only)?;
+        let status = parse_status(&status)?;
+        self.api
+            .update_entries_status(entry_ids, status, &self.client)
+            .await
+            .map_err(api_err)?;
+        Ok(CallToolResult::success(vec![Content::text(
+            "Entry status updated successfully",
+        )]))
+    }
+
+    #[tool(
+        name = "miniflux_toggle_bookmark",
+        description = "Toggle the bookmark/star status of an entry by its ID"
+    )]
+    async fn toggle_bookmark(
+        &self,
+        #[tool(param)] id: i64,
+    ) -> Result<CallToolResult, rmcp::Error> {
+        check_write_allowed(self.read_only)?;
+        self.api
+            .toggle_bookmark(id, &self.client)
+            .await
+            .map_err(api_err)?;
+        Ok(CallToolResult::success(vec![Content::text(
+            "Bookmark toggled successfully",
+        )]))
+    }
+
+    #[tool(
+        name = "miniflux_refresh_feed",
+        description = "Trigger a synchronous refresh of a feed by its ID. This fetches new entries from the source."
+    )]
+    async fn refresh_feed(
+        &self,
+        #[tool(param)] id: i64,
+    ) -> Result<CallToolResult, rmcp::Error> {
+        check_write_allowed(self.read_only)?;
+        self.api
+            .refresh_feed_synchronous(id, &self.client)
+            .await
+            .map_err(api_err)?;
+        Ok(CallToolResult::success(vec![Content::text(
+            "Feed refreshed successfully",
+        )]))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::config::Config;
+
+    #[test]
+    fn test_read_only_config_propagates() {
+        let config = Config::new(
+            "http://localhost:8080".into(),
+            Some("token".into()),
+            None,
+            None,
+            true,
+        )
+        .unwrap();
+        let server = MinifluxServer::new(&config);
+        assert!(server.read_only);
+    }
+
+    #[test]
+    fn test_check_write_allowed_blocks_in_read_only() {
+        assert!(check_write_allowed(true).is_err());
+    }
+
+    #[test]
+    fn test_check_write_allowed_permits_when_not_read_only() {
+        assert!(check_write_allowed(false).is_ok());
     }
 }
 
