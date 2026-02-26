@@ -255,6 +255,57 @@ impl MinifluxServer {
             "{:#?}", entries
         ))]))
     }
+
+    #[tool(
+        name = "miniflux_get_current_user",
+        description = "Get the currently authenticated user's information"
+    )]
+    async fn get_current_user(&self) -> Result<CallToolResult, rmcp::Error> {
+        let user = self
+            .api
+            .get_current_user(&self.client)
+            .await
+            .map_err(api_err)?;
+        Ok(CallToolResult::success(vec![Content::text(format!(
+            "{:#?}", user
+        ))]))
+    }
+
+    #[tool(
+        name = "miniflux_get_user_by_id",
+        description = "Get a user by their numeric ID"
+    )]
+    async fn get_user_by_id(
+        &self,
+        #[tool(param)] id: i64,
+    ) -> Result<CallToolResult, rmcp::Error> {
+        let user = self
+            .api
+            .get_user_by_id(id, &self.client)
+            .await
+            .map_err(api_err)?;
+        Ok(CallToolResult::success(vec![Content::text(format!(
+            "{:#?}", user
+        ))]))
+    }
+
+    #[tool(
+        name = "miniflux_get_user_by_name",
+        description = "Get a user by their username"
+    )]
+    async fn get_user_by_name(
+        &self,
+        #[tool(param)] username: String,
+    ) -> Result<CallToolResult, rmcp::Error> {
+        let user = self
+            .api
+            .get_user_by_name(&username, &self.client)
+            .await
+            .map_err(api_err)?;
+        Ok(CallToolResult::success(vec![Content::text(format!(
+            "{:#?}", user
+        ))]))
+    }
 }
 
 #[tool(tool_box)]
