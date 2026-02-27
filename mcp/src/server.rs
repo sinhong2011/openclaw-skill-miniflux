@@ -321,6 +321,48 @@ impl MinifluxServer {
     }
 
     #[tool(
+        name = "miniflux_create_category",
+        description = "Create a new feed category with the given title"
+    )]
+    async fn create_category(
+        &self,
+        #[tool(param)] title: String,
+    ) -> Result<CallToolResult, rmcp::Error> {
+        check_write_allowed(self.read_only)?;
+        let category = self
+            .api
+            .create_category(&title, &self.client)
+            .await
+            .map_err(api_err)?;
+        Ok(CallToolResult::success(vec![Content::text(format!(
+            "{:#?}",
+            category
+        ))]))
+    }
+
+    #[tool(
+        name = "miniflux_create_feed",
+        description = "Subscribe to a new feed by URL and assign it to a category. Returns the new feed ID."
+    )]
+    async fn create_feed(
+        &self,
+        #[tool(param)] feed_url: String,
+        #[tool(param)] category_id: i64,
+    ) -> Result<CallToolResult, rmcp::Error> {
+        check_write_allowed(self.read_only)?;
+        let parsed_url = url::Url::parse(&feed_url)
+            .map_err(|e| rmcp::Error::invalid_params(format!("Invalid URL: {e}"), None))?;
+        let feed_id = self
+            .api
+            .create_feed(&parsed_url, category_id, &self.client)
+            .await
+            .map_err(api_err)?;
+        Ok(CallToolResult::success(vec![Content::text(format!(
+            "Feed created successfully with ID: {feed_id}"
+        ))]))
+    }
+
+    #[tool(
         name = "miniflux_update_entry_status",
         description = "Mark one or more entries as read, unread, or removed. Provide a list of entry IDs and a status ('read', 'unread', or 'removed')."
     )]

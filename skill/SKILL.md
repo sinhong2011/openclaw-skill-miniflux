@@ -11,10 +11,11 @@ description: >
 
 ## What it does
 
-Provides read access to a Miniflux RSS reader instance through 13 read tools
-and 3 optional write tools. Agents can browse feeds, search entries by status
+Provides access to a Miniflux RSS reader instance through 13 read tools
+and 5 write tools. Agents can browse feeds, search entries by status
 or date, read specific articles, check categories, and (if not in read-only
-mode) mark entries as read and toggle bookmarks.
+mode) create categories, subscribe to feeds, mark entries as read, and
+toggle bookmarks.
 
 ## Inputs needed
 
@@ -22,6 +23,8 @@ mode) mark entries as read and toggle bookmarks.
 - For feed-specific queries: feed ID
 - For single items: entry ID, feed ID, or user ID
 - For discovery: a URL to scan for feeds
+- For creating categories: a title
+- For subscribing to feeds: a feed URL and category ID
 - For writes: entry IDs + status, or entry ID for bookmark toggle
 
 ## Prerequisites
@@ -130,11 +133,12 @@ Call `miniflux_get_entries` with filters:
 3. Mark reviewed entries as read: `miniflux_update_entry_status` with `status: "read"`
 4. Bookmark important ones: `miniflux_toggle_bookmark`
 
-### Discovering new feeds
+### Adding new feeds
 
-1. Call `miniflux_discover_subscription` with a website URL
+1. Call `miniflux_discover_subscription` with a website URL to find available feeds
 2. Present discovered feeds to the user
-3. User can subscribe manually in Miniflux UI
+3. If needed, call `miniflux_create_category` to create a new category
+4. Call `miniflux_create_feed` with the feed URL and category ID to subscribe
 
 ### Checking categories
 
