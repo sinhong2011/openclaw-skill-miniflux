@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use miniflux_api::MinifluxApi;
 use reqwest::Client;
-use rmcp::{ServerHandler, ServiceExt, model::*, tool};
+use rmcp::{model::*, tool, ServerHandler, ServiceExt};
 
 use crate::config::Config;
 
@@ -24,8 +24,13 @@ fn parse_status(s: &str) -> Result<EntryStatus, rmcp::Error> {
 }
 
 fn parse_order(s: &str) -> Result<OrderBy, rmcp::Error> {
-    OrderBy::try_from(s)
-        .map_err(|_| parse_err("order", s, "id, status, published_at, category_title, category_id"))
+    OrderBy::try_from(s).map_err(|_| {
+        parse_err(
+            "order",
+            s,
+            "id, status, published_at, category_title, category_id",
+        )
+    })
 }
 
 fn parse_direction(s: &str) -> Result<OrderDirection, rmcp::Error> {
@@ -97,22 +102,16 @@ impl MinifluxServer {
         description = "Export all feeds as OPML XML"
     )]
     async fn export_opml(&self) -> Result<CallToolResult, rmcp::Error> {
-        let opml = self
-            .api
-            .export_opml(&self.client)
-            .await
-            .map_err(api_err)?;
+        let opml = self.api.export_opml(&self.client).await.map_err(api_err)?;
         Ok(CallToolResult::success(vec![Content::text(opml)]))
     }
 
-    #[tool(
-        name = "miniflux_get_feeds",
-        description = "List all subscribed feeds"
-    )]
+    #[tool(name = "miniflux_get_feeds", description = "List all subscribed feeds")]
     async fn get_feeds(&self) -> Result<CallToolResult, rmcp::Error> {
         let feeds = self.api.get_feeds(&self.client).await.map_err(api_err)?;
         Ok(CallToolResult::success(vec![Content::text(format!(
-            "{:#?}", feeds
+            "{:#?}",
+            feeds
         ))]))
     }
 
@@ -121,13 +120,10 @@ impl MinifluxServer {
         description = "Get a single feed by its ID"
     )]
     async fn get_feed(&self, #[tool(param)] id: i64) -> Result<CallToolResult, rmcp::Error> {
-        let feed = self
-            .api
-            .get_feed(id, &self.client)
-            .await
-            .map_err(api_err)?;
+        let feed = self.api.get_feed(id, &self.client).await.map_err(api_err)?;
         Ok(CallToolResult::success(vec![Content::text(format!(
-            "{:#?}", feed
+            "{:#?}",
+            feed
         ))]))
     }
 
@@ -162,7 +158,8 @@ impl MinifluxServer {
             .await
             .map_err(api_err)?;
         Ok(CallToolResult::success(vec![Content::text(format!(
-            "{:#?}", feeds
+            "{:#?}",
+            feeds
         ))]))
     }
 
@@ -170,6 +167,7 @@ impl MinifluxServer {
         name = "miniflux_get_entries",
         description = "List entries with optional filters. Status: 'read', 'unread', 'removed'. Order: 'id', 'status', 'published_at', 'category_title', 'category_id'. Direction: 'asc' or 'desc'."
     )]
+    #[allow(clippy::too_many_arguments)]
     async fn get_entries(
         &self,
         #[tool(param)] status: Option<String>,
@@ -204,7 +202,8 @@ impl MinifluxServer {
             .await
             .map_err(api_err)?;
         Ok(CallToolResult::success(vec![Content::text(format!(
-            "{:#?}", entries
+            "{:#?}",
+            entries
         ))]))
     }
 
@@ -219,7 +218,8 @@ impl MinifluxServer {
             .await
             .map_err(api_err)?;
         Ok(CallToolResult::success(vec![Content::text(format!(
-            "{:#?}", entry
+            "{:#?}",
+            entry
         ))]))
     }
 
@@ -227,6 +227,7 @@ impl MinifluxServer {
         name = "miniflux_get_feed_entries",
         description = "Get entries for a specific feed by feed ID. Accepts same filters as get_entries."
     )]
+    #[allow(clippy::too_many_arguments)]
     async fn get_feed_entries(
         &self,
         #[tool(param)] feed_id: i64,
@@ -263,7 +264,8 @@ impl MinifluxServer {
             .await
             .map_err(api_err)?;
         Ok(CallToolResult::success(vec![Content::text(format!(
-            "{:#?}", entries
+            "{:#?}",
+            entries
         ))]))
     }
 
@@ -278,7 +280,8 @@ impl MinifluxServer {
             .await
             .map_err(api_err)?;
         Ok(CallToolResult::success(vec![Content::text(format!(
-            "{:#?}", user
+            "{:#?}",
+            user
         ))]))
     }
 
@@ -286,17 +289,15 @@ impl MinifluxServer {
         name = "miniflux_get_user_by_id",
         description = "Get a user by their numeric ID"
     )]
-    async fn get_user_by_id(
-        &self,
-        #[tool(param)] id: i64,
-    ) -> Result<CallToolResult, rmcp::Error> {
+    async fn get_user_by_id(&self, #[tool(param)] id: i64) -> Result<CallToolResult, rmcp::Error> {
         let user = self
             .api
             .get_user_by_id(id, &self.client)
             .await
             .map_err(api_err)?;
         Ok(CallToolResult::success(vec![Content::text(format!(
-            "{:#?}", user
+            "{:#?}",
+            user
         ))]))
     }
 
@@ -314,7 +315,8 @@ impl MinifluxServer {
             .await
             .map_err(api_err)?;
         Ok(CallToolResult::success(vec![Content::text(format!(
-            "{:#?}", user
+            "{:#?}",
+            user
         ))]))
     }
 
@@ -342,10 +344,7 @@ impl MinifluxServer {
         name = "miniflux_toggle_bookmark",
         description = "Toggle the bookmark/star status of an entry by its ID"
     )]
-    async fn toggle_bookmark(
-        &self,
-        #[tool(param)] id: i64,
-    ) -> Result<CallToolResult, rmcp::Error> {
+    async fn toggle_bookmark(&self, #[tool(param)] id: i64) -> Result<CallToolResult, rmcp::Error> {
         check_write_allowed(self.read_only)?;
         self.api
             .toggle_bookmark(id, &self.client)
@@ -360,10 +359,7 @@ impl MinifluxServer {
         name = "miniflux_refresh_feed",
         description = "Trigger a synchronous refresh of a feed by its ID. This fetches new entries from the source."
     )]
-    async fn refresh_feed(
-        &self,
-        #[tool(param)] id: i64,
-    ) -> Result<CallToolResult, rmcp::Error> {
+    async fn refresh_feed(&self, #[tool(param)] id: i64) -> Result<CallToolResult, rmcp::Error> {
         check_write_allowed(self.read_only)?;
         self.api
             .refresh_feed_synchronous(id, &self.client)

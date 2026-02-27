@@ -30,7 +30,9 @@ impl Config {
                 password: pass,
             },
             (None, Some(_), None) | (None, None, Some(_)) => {
-                return Err("Both --username and --password are required for user/pass auth".into());
+                return Err(
+                    "Both --username and --password are required for user/pass auth".into(),
+                );
             }
             (None, None, None) => {
                 return Err(
@@ -91,13 +93,7 @@ mod tests {
 
     #[test]
     fn test_no_auth_fails() {
-        let config = Config::new(
-            "http://localhost:8080".into(),
-            None,
-            None,
-            None,
-            false,
-        );
+        let config = Config::new("http://localhost:8080".into(), None, None, None, false);
         assert!(config.is_err());
     }
 

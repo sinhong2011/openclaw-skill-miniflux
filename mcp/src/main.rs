@@ -5,7 +5,11 @@ use clap::Parser;
 use config::Config;
 
 #[derive(Parser)]
-#[command(name = "openclaw-miniflux-mcp", version, about = "MCP server for Miniflux RSS reader")]
+#[command(
+    name = "openclaw-miniflux-mcp",
+    version,
+    about = "MCP server for Miniflux RSS reader"
+)]
 struct Cli {
     /// Miniflux instance URL
     #[arg(long, env = "MINIFLUX_URL")]
