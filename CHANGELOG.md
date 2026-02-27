@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4](https://github.com/sinhong2011/openclaw-skill-miniflux/compare/v0.1.3...v0.1.4) (2026-02-27)
+
+
+### Features
+
+* add create category and create feed tools ([13808de](https://github.com/sinhong2011/openclaw-skill-miniflux/commit/13808de986dae444169dc7dad4acbd0fd5053223))
+
 ## [0.1.3](https://github.com/sinhong2011/openclaw-skill-miniflux/compare/v0.1.2...v0.1.3) (2026-02-27)
 
 
