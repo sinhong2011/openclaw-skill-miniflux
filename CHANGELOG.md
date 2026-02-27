@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/sinhong2011/openclaw-skill-miniflux/compare/v0.1.1...v0.1.2) (2026-02-27)
+
+
+### Bug Fixes
+
+* rephrase directive language in skill to avoid suspicious pattern flag ([206ab76](https://github.com/sinhong2011/openclaw-skill-miniflux/commit/206ab761921640ea396272c349f804207d9d0ec6))
+
 ## [0.1.1](https://github.com/sinhong2011/openclaw-skill-miniflux/compare/v0.1.0...v0.1.1) (2026-02-27)
 
 
