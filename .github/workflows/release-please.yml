@@ -70,6 +70,20 @@ jobs:
           tag_name: ${{ needs.release-please.outputs.tag_name }}
           files: mcp/openclaw-miniflux-mcp-${{ matrix.target }}
 
+  publish-crate:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mcp
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo publish
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
   publish-skill:
     needs: [release-please, build]
     if: ${{ needs.release-please.outputs.release_created }}
