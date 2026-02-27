@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/sinhong2011/openclaw-skill-miniflux/compare/v0.1.2...v0.1.3) (2026-02-27)
+
+
+### Bug Fixes
+
+* configure release-please to update Cargo.toml version ([b57aa22](https://github.com/sinhong2011/openclaw-skill-miniflux/commit/b57aa228a0d82fdbf038234eca738dc5d4b2d901))
+
 ## [0.1.2](https://github.com/sinhong2011/openclaw-skill-miniflux/compare/v0.1.1...v0.1.2) (2026-02-27)
 
 
