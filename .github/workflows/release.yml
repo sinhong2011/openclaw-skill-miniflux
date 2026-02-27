@@ -70,7 +70,7 @@ jobs:
           RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: |
           npx clawhub@latest publish ./skill \
-            --slug miniflux \
+            --slug openclaw-miniflux \
             --name "Miniflux" \
             --version "${RELEASE_TAG#v}" \
             --changelog "Release ${RELEASE_TAG#v}" \
