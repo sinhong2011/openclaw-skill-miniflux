@@ -100,7 +100,7 @@ Add the MCP server to your client configuration:
 }
 ```
 
-Tell the user to:
+The user will need to:
 1. Replace the binary path with wherever they downloaded/installed it
 2. Replace `MINIFLUX_URL` with their Miniflux instance URL
 3. Get an API token from Miniflux: **Settings > API Keys > Create a new API key**
