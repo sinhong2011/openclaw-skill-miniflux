@@ -6,7 +6,11 @@
       "package-name": "openclaw-miniflux-mcp",
       "component": "openclaw-miniflux-mcp",
       "extra-files": [
-        "mcp/Cargo.toml"
+        {
+          "type": "toml",
+          "path": "mcp/Cargo.toml",
+          "jsonpath": "$.package.version"
+        }
       ],
       "bump-minor-pre-major": true,
       "bump-patch-for-minor-pre-major": true
