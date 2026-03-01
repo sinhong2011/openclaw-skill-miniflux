@@ -1,10 +1,10 @@
 ---
 name: miniflux
 description: >
-  Read RSS feeds and entries from a Miniflux instance. Handles requests like
-  "show my unread articles", "list my feeds", "what feeds do I have in category X",
-  "mark these entries as read", or "bookmark this article".
-  Uses openclaw-miniflux-mcp for all operations.
+  Manage RSS feeds and entries on a Miniflux instance. Handles requests like
+  "show my unread articles", "list my feeds", "rename this category",
+  "unsubscribe from this feed", "import my OPML", "mark these entries as read",
+  or "bookmark this article". Uses openclaw-miniflux-mcp for all operations.
 ---
 
 # Miniflux
@@ -12,10 +12,10 @@ description: >
 ## What it does
 
 Provides access to a Miniflux RSS reader instance through 13 read tools
-and 5 write tools. Agents can browse feeds, search entries by status
+and 10 write tools. Agents can browse feeds, search entries by status
 or date, read specific articles, check categories, and (if not in read-only
-mode) create categories, subscribe to feeds, mark entries as read, and
-toggle bookmarks.
+mode) create/update/delete feeds and categories, import OPML, mark entries
+as read, and toggle bookmarks.
 
 ## Inputs needed
 
@@ -24,7 +24,12 @@ toggle bookmarks.
 - For single items: entry ID, feed ID, or user ID
 - For discovery: a URL to scan for feeds
 - For creating categories: a title
+- For updating categories: category ID and new title
+- For deleting categories: category ID
 - For subscribing to feeds: a feed URL and category ID
+- For updating feeds: feed ID, plus optional title, category_id, feed_url, site_url, user_agent
+- For deleting feeds: feed ID
+- For OPML import: an OPML XML string
 - For writes: entry IDs + status, or entry ID for bookmark toggle
 
 ## Prerequisites
@@ -140,9 +145,23 @@ Call `miniflux_get_entries` with filters:
 3. If needed, call `miniflux_create_category` to create a new category
 4. Call `miniflux_create_feed` with the feed URL and category ID to subscribe
 
-### Checking categories
+### Managing feeds
 
-Call `miniflux_get_categories` to list all feed categories.
+- **Update:** `miniflux_update_feed` with feed ID and any fields to change (title, category_id, feed_url, site_url, user_agent)
+- **Delete:** `miniflux_delete_feed` with feed ID to unsubscribe
+- **Refresh:** `miniflux_refresh_feed` with feed ID to fetch new entries now
+
+### Managing categories
+
+- **List:** `miniflux_get_categories` to see all categories
+- **Create:** `miniflux_create_category` with a title
+- **Rename:** `miniflux_update_category` with category ID and new title
+- **Delete:** `miniflux_delete_category` with category ID (feeds move to default category)
+
+### Importing/Exporting
+
+- **Export:** `miniflux_export_opml` to get all feeds as OPML XML
+- **Import:** `miniflux_import_opml` with an OPML XML string to bulk-add feeds
 
 ## Guardrails
 
