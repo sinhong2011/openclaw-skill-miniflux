@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.5](https://github.com/sinhong2011/openclaw-skill-miniflux/compare/v0.1.4...v0.1.5) (2026-03-01)
+
+
+### Features
+
+* add update/delete feed, update/delete category, and import OPML tools ([65ed99d](https://github.com/sinhong2011/openclaw-skill-miniflux/commit/65ed99d04d8a6b92f9141b7639f8f98f9fa8c752))
+
 ## [0.1.4](https://github.com/sinhong2011/openclaw-skill-miniflux/compare/v0.1.3...v0.1.4) (2026-02-27)
 
 
