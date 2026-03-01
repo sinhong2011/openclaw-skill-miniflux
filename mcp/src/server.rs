@@ -456,10 +456,7 @@ impl MinifluxServer {
         name = "miniflux_delete_category",
         description = "Delete a category by its ID. Feeds in this category will be moved to the default category."
     )]
-    async fn delete_category(
-        &self,
-        #[tool(param)] id: i64,
-    ) -> Result<CallToolResult, rmcp::Error> {
+    async fn delete_category(&self, #[tool(param)] id: i64) -> Result<CallToolResult, rmcp::Error> {
         check_write_allowed(self.read_only)?;
         self.api
             .delete_category(id, &self.client)
