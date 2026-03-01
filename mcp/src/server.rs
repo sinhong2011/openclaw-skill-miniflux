@@ -106,6 +106,24 @@ impl MinifluxServer {
         Ok(CallToolResult::success(vec![Content::text(opml)]))
     }
 
+    #[tool(
+        name = "miniflux_import_opml",
+        description = "Import feeds from an OPML XML string"
+    )]
+    async fn import_opml(
+        &self,
+        #[tool(param)] opml: String,
+    ) -> Result<CallToolResult, rmcp::Error> {
+        check_write_allowed(self.read_only)?;
+        self.api
+            .import_opml(&opml, &self.client)
+            .await
+            .map_err(api_err)?;
+        Ok(CallToolResult::success(vec![Content::text(
+            "OPML imported successfully",
+        )]))
+    }
+
     #[tool(name = "miniflux_get_feeds", description = "List all subscribed feeds")]
     async fn get_feeds(&self) -> Result<CallToolResult, rmcp::Error> {
         let feeds = self.api.get_feeds(&self.client).await.map_err(api_err)?;
@@ -360,6 +378,96 @@ impl MinifluxServer {
         Ok(CallToolResult::success(vec![Content::text(format!(
             "Feed created successfully with ID: {feed_id}"
         ))]))
+    }
+
+    #[tool(
+        name = "miniflux_update_feed",
+        description = "Update a feed's title, category, feed URL, site URL, or user agent. Only provided fields are changed."
+    )]
+    #[allow(clippy::too_many_arguments)]
+    async fn update_feed(
+        &self,
+        #[tool(param)] id: i64,
+        #[tool(param)] title: Option<String>,
+        #[tool(param)] category_id: Option<i64>,
+        #[tool(param)] feed_url: Option<String>,
+        #[tool(param)] site_url: Option<String>,
+        #[tool(param)] user_agent: Option<String>,
+    ) -> Result<CallToolResult, rmcp::Error> {
+        check_write_allowed(self.read_only)?;
+        let feed = self
+            .api
+            .update_feed(
+                id,
+                title.as_deref(),
+                category_id,
+                feed_url.as_deref(),
+                site_url.as_deref(),
+                None,
+                None,
+                user_agent.as_deref(),
+                &self.client,
+            )
+            .await
+            .map_err(api_err)?;
+        Ok(CallToolResult::success(vec![Content::text(format!(
+            "{:#?}",
+            feed
+        ))]))
+    }
+
+    #[tool(
+        name = "miniflux_delete_feed",
+        description = "Unsubscribe from a feed by its ID. This removes the feed and all its entries."
+    )]
+    async fn delete_feed(&self, #[tool(param)] id: i64) -> Result<CallToolResult, rmcp::Error> {
+        check_write_allowed(self.read_only)?;
+        self.api
+            .delete_feed(id, &self.client)
+            .await
+            .map_err(api_err)?;
+        Ok(CallToolResult::success(vec![Content::text(
+            "Feed deleted successfully",
+        )]))
+    }
+
+    #[tool(
+        name = "miniflux_update_category",
+        description = "Rename a category by its ID"
+    )]
+    async fn update_category(
+        &self,
+        #[tool(param)] id: i64,
+        #[tool(param)] title: String,
+    ) -> Result<CallToolResult, rmcp::Error> {
+        check_write_allowed(self.read_only)?;
+        let category = self
+            .api
+            .update_category(id, &title, &self.client)
+            .await
+            .map_err(api_err)?;
+        Ok(CallToolResult::success(vec![Content::text(format!(
+            "{:#?}",
+            category
+        ))]))
+    }
+
+    #[tool(
+        name = "miniflux_delete_category",
+        description = "Delete a category by its ID. Feeds in this category will be moved to the default category."
+    )]
+    async fn delete_category(
+        &self,
+        #[tool(param)] id: i64,
+    ) -> Result<CallToolResult, rmcp::Error> {
+        check_write_allowed(self.read_only)?;
+        self.api
+            .delete_category(id, &self.client)
+            .await
+            .map_err(api_err)?;
+        Ok(CallToolResult::success(vec![Content::text(
+            "Category deleted successfully",
+        )]))
     }
 
     #[tool(
